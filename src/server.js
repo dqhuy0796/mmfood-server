@@ -1,7 +1,8 @@
-import bodyParser from "body-parser";
-import express from "express";
-import viewEngine from "./config/viewEngine";
-import initWebRoutes from "./routes/web";
+import bodyParser from 'body-parser';
+import express from 'express';
+import viewEngine from './config/viewEngine';
+import initWebRoutes from './routes/web';
+import connectDatabase from './config/connectDatabase';
 require('dotenv').config();
 
 let app = express();
@@ -11,6 +12,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 viewEngine(app);
 initWebRoutes(app);
+
+connectDatabase();
 
 let port = process.env.PORT || 9999;
 
