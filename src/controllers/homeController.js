@@ -1,10 +1,22 @@
-import db from '../models/index';
+import db from "../models/index";
+// import bcrypt from "bcryptjs";
+// const salt = bcrypt.genSaltSync(10);
+
+// const hashPassword = (password) => {
+//     return new Promise(async (resolve, reject) => {
+//         try {
+//             let hashPassword = await bcrypt.hashSync(password, salt);
+//             resolve(hashPassword);
+//         } catch (error) {
+//             reject(error);
+//         }
+//     });
+// };
 
 let getHomepage = async (req, res) => {
     try {
         let data = await db.User.findAll();
-        // console.log(data);
-        return res.render('home.ejs', { data: JSON.stringify(data) });
+        return res.send({ data: JSON.stringify(data) });
     } catch (error) {
         console.log(error);
     }
