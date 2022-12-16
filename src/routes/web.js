@@ -10,6 +10,7 @@ let initWebRoutes = (app) => {
     router.get("/", homeController.getHomepage);
 
     router.post("/api/login", userController.login);
+    router.post("/api/register", userController.register);
 
     router.get("/api/user/get", userController.getUser);
     router.post("/api/user/create", userController.createUser);

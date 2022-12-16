@@ -1,15 +1,15 @@
 import bcrypt from "bcryptjs";
 import db from "../models";
 
-let handleLogin = (email, password) => {
+let handleLogin = (phone, password) => {
     return new Promise(async (resolve, reject) => {
         try {
             let data = {};
-            let isExist = await isExistEmail(email);
+            let isExist = await isExistPhone(phone);
             if (isExist) {
                 let currentUser = await db.User.findOne({
-                    attributes: ["email", "name", "password", "role"],
-                    where: { email: email },
+                    attributes: ["phone", "email", "name", "password", "role"],
+                    where: { phone: phone },
                     raw: true,
                 });
                 if (currentUser) {
@@ -18,18 +18,48 @@ let handleLogin = (email, password) => {
                         data.code = 0;
                         data.message = "authenticate successfully";
                         delete currentUser.password;
-                        data.user = currentUser;
+                        data.result = currentUser;
                     } else {
                         data.code = 1;
                         data.message = "incorrect password";
                     }
                 } else {
                     data.code = 2;
-                    data.message = "invalid email";
+                    data.message = "invalid phone";
                 }
             } else {
                 data.code = 2;
-                data.message = "invalid email";
+                data.message = "invalid phone";
+            }
+            resolve(data);
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+let handleRegister = (user) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let data = {};
+            let isExist = await isExistPhone(user.phone);
+            if (!isExist) {
+                let hashedPassword = hashPassword(user.password);
+                await db.User.create({
+                    password: hashedPassword,
+                    name: user.name,
+                    birth: user.birth,
+                    avatarUrl: user.avatarUrl,
+                    phone: user.phone,
+                    email: user.email,
+                    address: user.address,
+                    role: "customer",
+                });
+                data.code = 0;
+                data.message = "successfully";
+            } else {
+                data.code = 1;
+                data.message = "phone number has been used";
             }
             resolve(data);
         } catch (error) {
@@ -134,42 +164,27 @@ let isValidUser = (user) => {
 
 let handleCreateUser = (user) => {
     return new Promise(async (resolve, reject) => {
-        let data = {};
-        // if (isExistEmail(user.email)) {
-        //     data.code = 1;
-        //     data.message = "Email is already exists";
-        // } else if (isExistPhone(user.phone)) {
-        //     data.code = 2;
-        //     data.message = "Phone number is already exists";
-        // } else {
-        //     let hashedPassword = hashPassword(user.password);
-        //     await db.User.create({
-        //         password: hashedPassword,
-        //         name: user.name,
-        //         birth: user.birth,
-        //         avatarUrl: user.avatarUrl,
-        //         phone: user.phone,
-        //         email: user.email,
-        //         address: user.address,
-        //         role: user.role,
-        //     });
-        //     data.code = 0;
-        //     data.message = "successfully";
-        // }
-        let hashedPassword = hashPassword(user.password);
-        await db.User.create({
-            password: hashedPassword,
-            name: user.name,
-            birth: user.birth,
-            avatarUrl: user.avatarUrl,
-            phone: user.phone,
-            email: user.email,
-            address: user.address,
-            role: user.role,
-        });
-        data.code = 0;
-        data.message = "successfully";
         try {
+            let data = {};
+            let isExist = await isExistPhone(phone);
+            if (!isExist) {
+                let hashedPassword = hashPassword(user.password);
+                await db.User.create({
+                    password: hashedPassword,
+                    name: user.name,
+                    birth: user.birth,
+                    avatarUrl: user.avatarUrl,
+                    phone: user.phone,
+                    email: user.email,
+                    address: user.address,
+                    role: user.role,
+                });
+                data.code = 0;
+                data.message = "successfully";
+            } else {
+                data.code = 1;
+                data.message = "phone number has been used";
+            }
             resolve(data);
         } catch (error) {
             reject(error);
@@ -238,6 +253,7 @@ let handleDeleteUser = (userId) => {
 
 export default {
     handleLogin,
+    handleRegister,
     handleGetUser,
     handleCreateUser,
     handleUpdateUser,
