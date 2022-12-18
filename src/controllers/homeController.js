@@ -1,17 +1,4 @@
 import db from "../models/index";
-// import bcrypt from "bcryptjs";
-// const salt = bcrypt.genSaltSync(10);
-
-// const hashPassword = (password) => {
-//     return new Promise(async (resolve, reject) => {
-//         try {
-//             let hashPassword = await bcrypt.hashSync(password, salt);
-//             resolve(hashPassword);
-//         } catch (error) {
-//             reject(error);
-//         }
-//     });
-// };
 
 let getHomepage = async (req, res) => {
     try {

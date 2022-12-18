@@ -20,6 +20,4 @@ connectDatabase();
 
 let port = process.env.PORT || 9999;
 
-app.listen(port, () => {
-    console.log(port);
-});
+app.listen(port);
