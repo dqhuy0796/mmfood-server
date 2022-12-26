@@ -29,6 +29,7 @@ let handleGetUser = (userId) => {
                     attributes: {
                         exclude: ["password"],
                     },
+                    order: [["id", "DESC"]],
                 });
 
                 data.code = 0;

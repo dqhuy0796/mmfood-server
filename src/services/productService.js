@@ -5,7 +5,9 @@ let handleGetProduct = (categoryId) => {
         try {
             let data = {};
             if (categoryId && categoryId === "all") {
-                let products = await db.Product.findAll();
+                let products = await db.Product.findAll({
+                    order: [["id", "DESC"]],
+                });
                 data.code = 0;
                 data.message = "get product(s) success";
                 data.result = products;
@@ -13,6 +15,7 @@ let handleGetProduct = (categoryId) => {
             if (categoryId && categoryId !== "all") {
                 let product = await db.Product.findAll({
                     where: { categoryId: categoryId },
+                    order: [["id", "DESC"]],
                 });
                 if (product) {
                     data.code = 0;

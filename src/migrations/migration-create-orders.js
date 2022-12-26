@@ -8,23 +8,23 @@ module.exports = {
                 primaryKey: true,
                 type: Sequelize.INTEGER,
             },
+            orderUuid: {
+                type: Sequelize.STRING,
+            },
             customerId: {
                 type: Sequelize.INTEGER,
             },
-            employeeId: {
-                type: Sequelize.INTEGER,
-            },
-            orderDetail: {
+            receiverDetails: {
                 type: Sequelize.TEXT,
             },
-            time: {
-                type: Sequelize.DATE,
+            items: {
+                type: Sequelize.TEXT,
             },
-            description: {
+            paymentDetails: {
                 type: Sequelize.TEXT,
             },
             state: {
-                type: Sequelize.STRING,
+                type: Sequelize.TEXT,
             },
             createdAt: {
                 allowNull: false,

@@ -5,13 +5,15 @@ let handleGetPost = (paramId) => {
         try {
             let data = {};
             if (paramId && paramId === "all") {
-                let posts = await db.Post.findAll();
+                let posts = await db.Posts.findAll({
+                    order: [["id", "DESC"]],
+                });
                 data.code = 0;
                 data.message = "get post(s) success";
                 data.result = posts;
             }
             if (paramId && paramId !== "all") {
-                let post = await db.Post.findOne({
+                let post = await db.Posts.findOne({
                     where: { id: paramId },
                 });
                 if (post) {
@@ -33,7 +35,7 @@ let handleGetPost = (paramId) => {
 let handleCreatePost = (post) => {
     return new Promise(async (resolve, reject) => {
         let data = {};
-        await db.Post.create({
+        await db.Posts.create({
             title: post.title,
             overview: post.overview,
             content: post.content,
@@ -54,11 +56,11 @@ let handleUpdatePost = (post) => {
     return new Promise(async (resolve, reject) => {
         let data = {};
         try {
-            let targetPost = await db.Post.findOne({
+            let targetPost = await db.Posts.findOne({
                 where: { id: post.id },
             });
             if (targetPost) {
-                await db.Post.update(
+                await db.Posts.update(
                     {
                         title: post.title,
                         overview: post.overview,
@@ -87,11 +89,11 @@ let handleDeletePost = (postId) => {
     return new Promise(async (resolve, reject) => {
         let data = {};
         try {
-            let targetPost = await db.Post.findOne({
+            let targetPost = await db.Posts.findOne({
                 where: { id: postId },
             });
             if (targetPost) {
-                await db.Post.destroy({
+                await db.Posts.destroy({
                     where: { id: postId },
                 });
                 data.code = 0;

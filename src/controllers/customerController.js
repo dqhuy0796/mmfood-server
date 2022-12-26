@@ -89,6 +89,21 @@ let updateCustomer = async (req, res) => {
     });
 };
 
+let updateCustomerAddress = async (req, res) => {
+    if (req.body.phone && req.body.address) {
+        let data = await customerService.handleUpdateCustomerAddress(req.body.phone, req.body.address);
+
+        return res.status(200).json({
+            code: data.code,
+            message: data.message,
+        });
+    }
+    return res.status(200).json({
+        code: 1,
+        message: "missing parameter(s)",
+    });
+};
+
 let deleteCustomer = async (req, res) => {
     if (req.body.id) {
         let data = await customerService.handleDeleteCustomer(req.body.id);
@@ -110,5 +125,6 @@ module.exports = {
     getCustomer,
     createCustomer,
     updateCustomer,
+    updateCustomerAddress,
     deleteCustomer,
 };

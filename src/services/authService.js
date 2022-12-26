@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import db from "../models";
-
+import { Sequelize } from "sequelize";
 let handleLogin = (phone, password) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -67,6 +67,81 @@ let handleRegister = (user) => {
     });
 };
 
+let handleChangePassword = (phone, password, newPassword) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let data = {};
+            let isExist = await isExistPhone(phone);
+            if (isExist) {
+                let currentUser = await db.User.findOne({
+                    where: { phone: phone },
+                    raw: true,
+                });
+                if (currentUser) {
+                    let isValidPassword = bcrypt.compareSync(password, currentUser.password);
+                    if (isValidPassword) {
+                        let hashedPassword = hashPassword(newPassword);
+                        await db.User.update(
+                            {
+                                password: hashedPassword,
+                            },
+                            {
+                                where: { phone: phone },
+                            },
+                        );
+                        data.code = 0;
+                        data.message = "change password success";
+                    } else {
+                        data.code = 1;
+                        data.message = "incorrect password";
+                    }
+                } else {
+                    data.code = 2;
+                    data.message = "invalid phone";
+                }
+            } else {
+                data.code = 2;
+                data.message = "invalid phone";
+            }
+            resolve(data);
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+let handleSearch = (input) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let data = {};
+            if (input && input === " ") {
+                data.code = 1;
+                data.message = "cannot search with blank input";
+            }
+            if (input && input !== " ") {
+                const Op = Sequelize.Op;
+                let products = await db.Product.findAll({
+                    where: {
+                        name: { [Op.like]: `%${input}%` },
+                    },
+                    order: [["categoryId", "ASC"]],
+                });
+                if (products.length > 0) {
+                    data.code = 0;
+                    data.message = "search success";
+                    data.result = products;
+                } else {
+                    data.code = 2;
+                    data.message = "no results match";
+                }
+            }
+            resolve(data);
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
 let isExistEmail = (currentEmail) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -122,4 +197,6 @@ let hashPassword = (password) => {
 export default {
     handleLogin,
     handleRegister,
+    handleChangePassword,
+    handleSearch,
 };

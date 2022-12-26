@@ -18,11 +18,9 @@ let getOrder = async (req, res) => {
 let createOrder = async (req, res) => {
     let order = {};
     order.customerId = req.body.customerId;
-    order.employeeId = req.body.employeeId;
-    order.orderDetail = req.body.orderDetail;
-    order.time = req.body.time;
-    order.description = req.body.description;
-    order.state = req.body.state;
+    order.receiverDetails = req.body.receiverDetails;
+    order.items = req.body.items;
+    order.paymentDetails = req.body.paymentDetails;
 
     let data = await orderService.handleCreateOrder(order);
 

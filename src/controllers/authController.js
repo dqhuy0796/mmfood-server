@@ -36,7 +36,45 @@ let register = async (req, res) => {
     });
 };
 
+let changePassword = async (req, res) => {
+    let phone = req.body.phone;
+    let password = req.body.password;
+    let newPassword = req.body.newPassword;
+
+    if (!phone || !password) {
+        return res.status(500).json({
+            code: 3,
+            message: "missing parameter(s)",
+        });
+    }
+
+    let data = await authService.handleChangePassword(phone, password, newPassword);
+
+    return res.status(200).json({
+        code: data.code,
+        message: data.message,
+    });
+};
+
+let search = async (req, res) => {
+    if (req.query.input) {
+        const input = req.query.input.trim();
+        let data = await authService.handleSearch(input);
+        return res.status(200).json({
+            code: data.code,
+            message: data.message,
+            result: data.result ? data.result : [],
+        });
+    }
+    return res.status(200).json({
+        code: 1,
+        message: "missing parameter(s)",
+    });
+};
+
 export default {
     login,
     register,
+    changePassword,
+    search,
 };

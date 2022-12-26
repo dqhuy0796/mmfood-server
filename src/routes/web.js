@@ -6,6 +6,7 @@ import homeController from "../controllers/homeController";
 import adminController from "../controllers/adminController";
 import authController from "../controllers/authController";
 import customerController from "../controllers/customerController";
+import orderController from "../controllers/orderController";
 
 let router = express.Router();
 
@@ -16,6 +17,13 @@ let initWebRoutes = (app) => {
 
     router.post("/api/login", authController.login);
     router.post("/api/register", authController.register);
+    router.post("/api/changepassword", authController.changePassword);
+    router.get("/api/search", authController.search);
+
+    router.get("/api/order/get", orderController.getOrder);
+    router.post("/api/order/create", orderController.createOrder);
+    router.put("/api/order/update", orderController.updateOrder);
+    router.delete("/api/order/delete", orderController.deleteOrder);
 
     router.get("/api/user/get", userController.getUser);
     router.post("/api/user/create", userController.createUser);
@@ -25,6 +33,7 @@ let initWebRoutes = (app) => {
     router.get("/api/customer/get", customerController.getCustomer);
     router.post("/api/customer/create", customerController.createCustomer);
     router.put("/api/customer/update", customerController.updateCustomer);
+    router.put("/api/customer/update/address", customerController.updateCustomerAddress);
     router.delete("/api/customer/delete", customerController.deleteCustomer);
 
     router.get("/api/product/get", productController.getProduct);

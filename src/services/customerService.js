@@ -32,6 +32,7 @@ let handleGetCustomer = (customerId) => {
                     where: {
                         role: "customer",
                     },
+                    order: [["id", "DESC"]],
                 });
 
                 data.code = 0;
@@ -134,6 +135,39 @@ let handleUpdateCustomer = (customer) => {
     });
 };
 
+let handleUpdateCustomerAddress = (phone, address) => {
+    return new Promise(async (resolve, reject) => {
+        let data = {};
+        try {
+            let targetCustomer = await db.User.findOne({
+                where: {
+                    phone: phone,
+                },
+            });
+            if (targetCustomer && targetCustomer.address !== address) {
+                await db.User.update(
+                    {
+                        address: address,
+                    },
+                    {
+                        where: {
+                            phone: phone,
+                        },
+                    },
+                );
+                data.code = 0;
+                data.message = "update customer address successfully";
+            } else {
+                data.code = 1;
+                data.message = "invalid customer address";
+            }
+            resolve(data);
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
 let handleDeleteCustomer = (customerId) => {
     return new Promise(async (resolve, reject) => {
         let data = {};
@@ -166,5 +200,6 @@ export default {
     handleGetCustomer,
     handleCreateCustomer,
     handleUpdateCustomer,
+    handleUpdateCustomerAddress,
     handleDeleteCustomer,
 };
