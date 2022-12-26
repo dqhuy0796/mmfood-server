@@ -36,14 +36,22 @@ let handleGetOrder = (paramId) => {
 let handleCreateOrder = (order) => {
     return new Promise(async (resolve, reject) => {
         let data = {};
-        let datetimeUuid = new Date().valueOf();
+        const thisMoment = new Date();
+        const datetimeUuid = thisMoment.valueOf();
+        const stateArray = [
+            {
+                code: 0,
+                description: "Chờ xử lý",
+                time: thisMoment.toISOString(),
+            },
+        ];
         await db.Order.create({
             orderUuid: datetimeUuid,
             customerId: order.customerId,
             receiverDetails: order.receiverDetails,
             items: order.items,
             paymentDetails: order.paymentDetails,
-            state: "Chờ xử lý",
+            state: JSON.stringify(stateArray),
         });
         // có nên map từ stringlify order detail ra bảng mới
         data.code = 0;
@@ -98,18 +106,30 @@ let handleCancelOrder = (uuid) => {
                 where: { orderUuid: uuid },
             });
             if (targetOrder) {
-                await db.Order.update(
-                    {
-                        state: "Đã hủy",
-                    },
-                    {
-                        where: { orderUuid: uuid },
-                    },
-                );
-                data.code = 0;
-                data.message = "this order has been cancelled";
+                const thisMoment = new Date();
+                const stateArray = JSON.parse(targetOrder.state);
+                if (stateArray[stateArray.length - 1].code !== 4) {
+                    const newStateArray = [
+                        ...stateArray,
+                        {
+                            code: 4,
+                            description: "Đã hủy",
+                            time: thisMoment.toISOString(),
+                        },
+                    ];
+                    await db.Order.update(
+                        {
+                            state: JSON.stringify(newStateArray),
+                        },
+                        {
+                            where: { orderUuid: uuid },
+                        },
+                    );
+                    data.code = 0;
+                    data.message = "this order has been cancelled";
+                }
             } else {
-                data.code = 1;
+                data.code = 2;
                 data.message = "invalid order";
             }
             resolve(data);
