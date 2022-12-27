@@ -64,31 +64,120 @@ let handleCreateOrder = (order) => {
     });
 };
 
-let handleUpdateOrder = (order) => {
+let handleConfirmOrder = (uuid) => {
     return new Promise(async (resolve, reject) => {
         let data = {};
         try {
             let targetOrder = await db.Order.findOne({
-                where: { id: order.id },
+                where: { orderUuid: uuid },
             });
             if (targetOrder) {
-                await db.Order.update(
-                    {
-                        customerId: order.customerId,
-                        employeeId: order.employeeId,
-                        orderDetail: order.orderDetail,
-                        time: order.time,
-                        description: order.description,
-                        state: order.state,
-                    },
-                    {
-                        where: { id: order.id },
-                    },
-                );
-                data.code = 0;
-                data.message = "update order success";
+                const thisMoment = new Date();
+                const stateArray = JSON.parse(targetOrder.state);
+                if (stateArray[stateArray.length - 1].code < 1) {
+                    const newStateArray = [
+                        ...stateArray,
+                        {
+                            code: 1,
+                            description: "Đã xác nhận",
+                            time: thisMoment.toISOString(),
+                        },
+                    ];
+                    await db.Order.update(
+                        {
+                            state: JSON.stringify(newStateArray),
+                        },
+                        {
+                            where: { orderUuid: uuid },
+                        },
+                    );
+                    data.code = 0;
+                    data.message = "this order has been confirmed";
+                }
             } else {
-                data.code = 1;
+                data.code = 2;
+                data.message = "invalid order";
+            }
+            resolve(data);
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+let handleDeliveryOrder = (uuid) => {
+    return new Promise(async (resolve, reject) => {
+        let data = {};
+        try {
+            let targetOrder = await db.Order.findOne({
+                where: { orderUuid: uuid },
+            });
+            if (targetOrder) {
+                const thisMoment = new Date();
+                const stateArray = JSON.parse(targetOrder.state);
+                if (stateArray[stateArray.length - 1].code < 2) {
+                    const newStateArray = [
+                        ...stateArray,
+                        {
+                            code: 2,
+                            description: "Đang giao hàng",
+                            time: thisMoment.toISOString(),
+                        },
+                    ];
+                    await db.Order.update(
+                        {
+                            state: JSON.stringify(newStateArray),
+                        },
+                        {
+                            where: { orderUuid: uuid },
+                        },
+                    );
+                    data.code = 0;
+                    data.message = "this order being delivery";
+                }
+            } else {
+                data.code = 2;
+                data.message = "invalid order";
+            }
+            resolve(data);
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+let handleFinishOrder = (uuid) => {
+    return new Promise(async (resolve, reject) => {
+        let data = {};
+        try {
+            let targetOrder = await db.Order.findOne({
+                where: { orderUuid: uuid },
+            });
+            if (targetOrder) {
+                const thisMoment = new Date();
+                const stateArray = JSON.parse(targetOrder.state);
+                if (stateArray[stateArray.length - 1].code < 2) {
+                    const newStateArray = [
+                        ...stateArray,
+                        {
+                            code: 3,
+                            description: "Hoàn thành",
+                            time: thisMoment.toISOString(),
+                        },
+                    ];
+                    await db.Order.update(
+                        {
+                            state: JSON.stringify(newStateArray),
+                        },
+                        {
+                            where: { orderUuid: uuid },
+                        },
+                    );
+                    data.code = 0;
+                    data.message = "delivery success";
+                }
+            } else {
+                data.code = 2;
                 data.message = "invalid order";
             }
             resolve(data);
@@ -166,7 +255,9 @@ let handleDeleteOrder = (orderId) => {
 export default {
     handleGetOrder,
     handleCreateOrder,
-    handleUpdateOrder,
+    handleConfirmOrder,
+    handleDeliveryOrder,
+    handleFinishOrder,
     handleCancelOrder,
     handleDeleteOrder,
 };

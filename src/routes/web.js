@@ -22,9 +22,9 @@ let initWebRoutes = (app) => {
 
     router.get("/api/order/get", orderController.getOrder);
     router.post("/api/order/create", orderController.createOrder);
+    router.post("/api/order/confirm", orderController.confirmOrder);
+    router.post("/api/order/delivery", orderController.deliveryOrder);
     router.post("/api/order/cancel", orderController.cancelOrder);
-    // router.put("/api/order/update", orderController.updateOrder);
-    // router.delete("/api/order/delete", orderController.deleteOrder);
 
     router.get("/api/user/get", userController.getUser);
     router.post("/api/user/create", userController.createUser);

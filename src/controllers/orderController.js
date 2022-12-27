@@ -30,9 +30,9 @@ let createOrder = async (req, res) => {
     });
 };
 
-let cancelOrder = async (req, res) => {
+let confirmOrder = async (req, res) => {
     if (req.body.uuid) {
-        let data = await orderService.handleCancelOrder(req.body.uuid);
+        let data = await orderService.handleConfirmOrder(req.body.uuid);
 
         return res.status(200).json({
             code: data.code,
@@ -45,21 +45,33 @@ let cancelOrder = async (req, res) => {
     });
 };
 
-let updateOrder = async (req, res) => {
-    let order = {};
-    order.id = req.body.id;
-    order.customerId = req.body.customerId;
-    order.employeeId = req.body.employeeId;
-    order.orderDetail = req.body.orderDetail;
-    order.time = req.body.time;
-    order.description = req.body.description;
-    order.state = req.body.state;
+let deliveryOrder = async (req, res) => {
+    if (req.body.uuid) {
+        let data = await orderService.handleDeliveryOrder(req.body.uuid);
 
-    let data = await orderService.handleUpdateOrder(order);
-
+        return res.status(200).json({
+            code: data.code,
+            message: data.message,
+        });
+    }
     return res.status(200).json({
-        code: data.code,
-        message: data.message,
+        code: 1,
+        message: "missing parameter(s)",
+    });
+};
+
+let cancelOrder = async (req, res) => {
+    if (req.body.uuid) {
+        let data = await orderService.handleCancelOrder(req.body.uuid);
+
+        return res.status(200).json({
+            code: data.code,
+            message: data.message,
+        });
+    }
+    return res.status(200).json({
+        code: 1,
+        message: "missing parameter(s)",
     });
 };
 
@@ -81,7 +93,8 @@ let deleteOrder = async (req, res) => {
 module.exports = {
     getOrder,
     createOrder,
+    confirmOrder,
+    deliveryOrder,
     cancelOrder,
-    updateOrder,
     deleteOrder,
 };
