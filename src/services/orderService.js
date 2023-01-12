@@ -146,7 +146,7 @@ let handleDeliveryOrder = (uuid) => {
     });
 };
 
-let handleFinishOrder = (uuid) => {
+let handleFinishedOrder = (uuid) => {
     return new Promise(async (resolve, reject) => {
         let data = {};
         try {
@@ -156,12 +156,12 @@ let handleFinishOrder = (uuid) => {
             if (targetOrder) {
                 const thisMoment = new Date();
                 const stateArray = JSON.parse(targetOrder.state);
-                if (stateArray[stateArray.length - 1].code < 2) {
+                if (stateArray[stateArray.length - 1].code === 2) {
                     const newStateArray = [
                         ...stateArray,
                         {
                             code: 3,
-                            description: "Hoàn thành",
+                            description: "Giao hàng thành công",
                             time: thisMoment.toISOString(),
                         },
                     ];
@@ -257,7 +257,7 @@ export default {
     handleCreateOrder,
     handleConfirmOrder,
     handleDeliveryOrder,
-    handleFinishOrder,
+    handleFinishedOrder,
     handleCancelOrder,
     handleDeleteOrder,
 };

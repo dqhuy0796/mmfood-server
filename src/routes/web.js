@@ -24,6 +24,7 @@ let initWebRoutes = (app) => {
     router.post("/api/order/create", orderController.createOrder);
     router.post("/api/order/confirm", orderController.confirmOrder);
     router.post("/api/order/delivery", orderController.deliveryOrder);
+    router.post("/api/order/finished", orderController.finishedOrder);
     router.post("/api/order/cancel", orderController.cancelOrder);
 
     router.get("/api/user/get", userController.getUser);

@@ -60,6 +60,21 @@ let deliveryOrder = async (req, res) => {
     });
 };
 
+let finishedOrder = async (req, res) => {
+    if (req.body.uuid) {
+        let data = await orderService.handleFinishedOrder(req.body.uuid);
+
+        return res.status(200).json({
+            code: data.code,
+            message: data.message,
+        });
+    }
+    return res.status(200).json({
+        code: 1,
+        message: "missing parameter(s)",
+    });
+};
+
 let cancelOrder = async (req, res) => {
     if (req.body.uuid) {
         let data = await orderService.handleCancelOrder(req.body.uuid);
@@ -95,6 +110,7 @@ module.exports = {
     createOrder,
     confirmOrder,
     deliveryOrder,
+    finishedOrder,
     cancelOrder,
     deleteOrder,
 };
