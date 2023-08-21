@@ -14,17 +14,14 @@ module.exports = {
             customerId: {
                 type: Sequelize.INTEGER,
             },
-            receiverDetails: {
+            deliveryAddressId: {
+                type: Sequelize.INTEGER,
+            },
+            note: {
                 type: Sequelize.TEXT,
             },
-            items: {
-                type: Sequelize.TEXT,
-            },
-            paymentDetails: {
-                type: Sequelize.TEXT,
-            },
-            state: {
-                type: Sequelize.TEXT,
+            subtotal: {
+                type: Sequelize.DOUBLE,
             },
             createdAt: {
                 allowNull: false,

@@ -1,30 +1,22 @@
 import bcrypt from "bcryptjs";
 import db from "../models";
+import { ResponseCode } from "../constant";
 
-let isExistPhone = (currentPhone) => {
+/** GET USER(S) */
+
+let handleGetUser = (username) => {
     return new Promise(async (resolve, reject) => {
         try {
-            let currentUser = await db.User.findOne({
-                where: {
-                    phone: currentPhone,
-                },
-            });
-            if (currentUser) {
-                resolve(true);
-            } else {
-                resolve(false);
+            // undefined id
+            if (!username) {
+                const code = ResponseCode.MISSING_PARAMETER;
+                const message = "Missing parameter(s).";
+                const result = {};
+                resolve({ code, message, result });
             }
-        } catch (error) {
-            reject(error);
-        }
-    });
-};
 
-let handleGetUser = (userId) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            let data = {};
-            if (userId && userId === "all") {
+            // id === all
+            if (username === "all") {
                 let users = await db.User.findAll({
                     attributes: {
                         exclude: ["password"],
@@ -32,133 +24,170 @@ let handleGetUser = (userId) => {
                     order: [["id", "DESC"]],
                 });
 
-                data.code = 0;
-                data.message = "get user(s) success";
-                data.result = users.filter((item) => item.role !== "customer");
+                const code = ResponseCode.SUCCESS;
+                const message = "Get user(s) successfully.";
+                const result = users;
+                resolve({ code, message, result });
             }
-            if (userId && userId !== "all") {
-                let user = await db.User.findOne({
-                    attributes: {
-                        exclude: ["password"],
-                    },
-                    where: { id: userId },
-                });
-                if (user) {
-                    data.code = 0;
-                    data.message = "get user(s) success";
-                    data.result = user;
-                }
+
+            // valid id
+            let user = await db.User.findOne({
+                attributes: {
+                    exclude: ["password"],
+                },
+                where: { username: username },
+            });
+
+            // if user not found
+            if (!user) {
+                const code = ResponseCode.FILE_NOT_FOUND;
+                const message = "User not found.";
+                const result = {};
+                resolve({ code, message, result });
             }
-            resolve(data);
+
+            // if user found
+            const code = ResponseCode.SUCCESS;
+            const message = "Get user(s) successfully.";
+            const result = user;
+            resolve({ code, message, result });
         } catch (error) {
             reject(error);
         }
     });
 };
 
-let hashPassword = (password) => {
-    const salt = bcrypt.genSaltSync(10);
-    return bcrypt.hashSync(password, salt);
-    // return new Promise(async (resolve, reject) => {
-    //     try {
-    //         let hashPassword = bcrypt.hashSync(password, salt);
-    //         resolve(hashPassword);
-    //     } catch (error) {
-    //         reject(error);
-    //     }
-    // });
-};
+/** CREATE NEW USER */
 
 let handleCreateUser = (user) => {
     return new Promise(async (resolve, reject) => {
         try {
-            let data = {};
-            let isExist = await isExistPhone(user.phone);
-            if (!isExist) {
+            let isExist = await isExistUsername(user.username);
+            // if username already in use
+            if (isExist) {
+                const code = ResponseCode.DATABASE_ERROR;
+                const message = "username already in use.";
+                const result = {};
+                resolve({ code, message, result });
+            } else {
                 let hashedPassword = hashPassword(user.password);
                 await db.User.create({
+                    username: user.username,
                     password: hashedPassword,
                     name: user.name,
-                    birth: user.birth,
-                    avatarUrl: user.avatarUrl,
-                    phone: user.phone,
+                    birth: user.birth || null,
+                    avatarUrl: user.avatarUrl || null,
+                    phoneNumber: user.phoneNumber,
                     email: user.email,
                     address: user.address,
                     role: user.role,
                 });
-                data.code = 0;
-                data.message = "successfully";
-            } else {
-                data.code = 1;
-                data.message = "phone number has been used";
+
+                const code = ResponseCode.SUCCESS;
+                const message = "Create user successfully.";
+                const result = user;
+                resolve({ code, message, result });
             }
-            resolve(data);
         } catch (error) {
             reject(error);
         }
     });
 };
 
+/** UPDATE USER */
+
 let handleUpdateUser = (user) => {
     return new Promise(async (resolve, reject) => {
-        let data = {};
         try {
             let targetUser = await db.User.findOne({
-                where: { id: user.id },
+                where: { username: user.username },
             });
+
             if (targetUser) {
                 await db.User.update(
                     {
                         name: user.name,
-                        birth: user.birth,
-                        avatarUrl: user.avatarUrl,
-                        phone: user.phone,
+                        birth: user.birth || null,
+                        avatarUrl: user.avatarUrl || null,
+                        phoneNumber: user.phoneNumber,
                         email: user.email,
                         address: user.address,
                         role: user.role,
                     },
                     {
-                        where: { id: user.id },
+                        where: { username: user.username },
                     },
                 );
-                data.code = 0;
-                data.message = "update user successfully";
+                const code = ResponseCode.SUCCESS;
+                const message = "Update user infomation successfully";
+                const result = user;
+                resolve({ code, message, result });
             } else {
-                data.code = 1;
-                data.message = "invalid user";
+                const code = ResponseCode.DATABASE_ERROR;
+                const message = "Invalid user infomation";
+                const result = {};
+                resolve({ code, message, result });
             }
-            resolve(data);
         } catch (error) {
             reject(error);
         }
     });
 };
 
-let handleDeleteUser = (userId) => {
+/** DELETE USER */
+
+let handleDeleteUser = (username) => {
     return new Promise(async (resolve, reject) => {
-        let data = {};
         try {
             let targetUser = await db.User.findOne({
-                where: { id: userId },
+                where: { username: username },
             });
+
             if (targetUser) {
                 await db.User.destroy({
-                    where: { id: userId },
+                    where: { username: username },
                 });
-                data.code = 0;
-                data.message = "delete user successfully";
+                const code = ResponseCode.SUCCESS;
+                const message = "Delete user infomation successfully";
+                resolve({ code, message, username });
             } else {
-                data.code = 1;
-                data.message = "invalid user";
+                const code = ResponseCode.DATABASE_ERROR;
+                const message = "Invalid user infomation";
+                resolve({ code, message, username });
             }
-            resolve(data);
         } catch (error) {
             reject(error);
         }
     });
 };
 
-export default {
+/** SUPPORTER METHODS */
+let isExistUsername = async (username) => {
+    try {
+        let user = await db.User.findOne({
+            where: {
+                username: username,
+            },
+        });
+        if (user) {
+            return true;
+        }
+        return false;
+    } catch (error) {
+        throw error;
+    }
+};
+
+let isNumeric = (input) => {
+    return !isNaN(input);
+};
+
+let hashPassword = (password) => {
+    const salt = bcrypt.genSaltSync(10);
+    return bcrypt.hashSync(password, salt);
+};
+
+module.exports = {
     handleGetUser,
     handleCreateUser,
     handleUpdateUser,

@@ -1,4 +1,4 @@
-import productService from "../services/productService";
+import productService from "../services/productService.js";
 
 let getProduct = async (req, res) => {
     if (req.query.id) {
@@ -70,7 +70,7 @@ let deleteProduct = async (req, res) => {
     });
 };
 
-module.exports = {
+export default {
     getProduct,
     createProduct,
     updateProduct,

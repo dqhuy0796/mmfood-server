@@ -1,74 +1,65 @@
+import { ResponseCode } from "../constant";
 import userService from "../services/userService";
 
 let getUser = async (req, res) => {
-    if (req.query.id) {
-        let data = await userService.handleGetUser(req.query.id);
-        return res.status(200).json({
-            code: data.code,
-            message: data.message,
-            result: data.result ? data.result : {},
+    if (!req.query.username) {
+        return res.status(500).json({
+            code: ResponseCode.MISSING_PARAMETER,
+            message: "Missing parameter(s). Check again.",
         });
     }
-    return res.status(200).json({
-        code: 1,
-        message: "missing parameter(s)",
-    });
+    let data = await userService.handleGetUser(req.query.username);
+
+    return res.status(200).json(data);
 };
 
 let createUser = async (req, res) => {
     let user = {};
+    user.username = req.body.username;
     user.password = req.body.password;
     user.name = req.body.name;
     user.birth = req.body.birth;
     user.avatarUrl = req.body.avatarUrl;
-    user.phone = req.body.phone;
+    user.phoneNumber = req.body.phoneNumber;
     user.email = req.body.email;
     user.address = req.body.address;
     user.role = req.body.role;
 
     let data = await userService.handleCreateUser(user);
 
-    return res.status(200).json({
-        code: data.code,
-        message: data.message,
-    });
+    return res.status(200).json(data);
 };
 
 let updateUser = async (req, res) => {
     let user = {};
-    user.id = req.body.id;
+    user.username = req.body.username;
     user.name = req.body.name;
     user.birth = req.body.birth;
     user.avatarUrl = req.body.avatarUrl;
-    user.phone = req.body.phone;
+    user.phoneNumber = req.body.phoneNumber;
     user.email = req.body.email;
     user.address = req.body.address;
     user.role = req.body.role;
 
     let data = await userService.handleUpdateUser(user);
 
-    return res.status(200).json({
-        code: data.code,
-        message: data.message,
-    });
+    return res.status(200).json(data);
 };
 
 let deleteUser = async (req, res) => {
-    if (req.body.id) {
-        let data = await userService.handleDeleteUser(req.body.id);
-        console.log(data);
-        return res.status(200).json({
-            code: data.code,
-            message: data.message,
+    if (!req.body.username) {
+        return res.status(500).json({
+            code: ResponseCode.MISSING_PARAMETER,
+            message: "Missing parameter(s). Check again.",
         });
     }
-    return res.status(200).json({
-        code: 1,
-        message: "missing parameter(s)",
-    });
+
+    let data = await userService.handleDeleteUser(req.body.username);
+
+    return res.status(200).json(data);
 };
 
-module.exports = {
+export default {
     getUser,
     createUser,
     updateUser,

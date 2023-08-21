@@ -1,55 +1,13 @@
 import bcrypt from "bcryptjs";
 import db from "../models";
-
-let handleAdminLogin = (phone, password) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            let data = {};
-            let isExist = await isExistPhone(phone);
-            if (isExist) {
-                let currentUser = await db.User.findOne({
-                    where: {
-                        phone: phone,
-                    },
-                    raw: true,
-                });
-                if (currentUser) {
-                    if (currentUser.role === "admin") {
-                        let isValidPassword = bcrypt.compareSync(password, currentUser.password);
-                        if (isValidPassword) {
-                            data.code = 0;
-                            data.message = "authenticate successfully";
-                            delete currentUser.password;
-                            data.result = currentUser;
-                        } else {
-                            data.code = 1;
-                            data.message = "incorrect password";
-                        }
-                    } else {
-                        data.code = 2;
-                        data.message = "access denied";
-                    }
-                } else {
-                    data.code = 3;
-                    data.message = "invalid account";
-                }
-            } else {
-                data.code = 3;
-                data.message = "invalid account";
-            }
-            resolve(data);
-        } catch (error) {
-            reject(error);
-        }
-    });
-};
+import { ResponseCode } from "../constant";
 
 let isExistPhone = (currentPhone) => {
     return new Promise(async (resolve, reject) => {
         try {
             let currentUser = await db.User.findOne({
                 where: {
-                    phone: currentPhone,
+                    phoneNumber: currentPhone,
                 },
             });
             if (currentUser) {
@@ -63,6 +21,49 @@ let isExistPhone = (currentPhone) => {
     });
 };
 
-export default {
+let handleAdminLogin = (phoneNumber, password) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let data = {};
+            let isExist = await isExistPhone(phoneNumber);
+            if (isExist) {
+                let currentUser = await db.User.findOne({
+                    where: {
+                        phoneNumber: phoneNumber,
+                    },
+                    raw: true,
+                });
+                if (currentUser) {
+                    if (currentUser.role === "admin") {
+                        let isValidPassword = bcrypt.compareSync(password, currentUser.password);
+                        if (isValidPassword) {
+                            data.code = ResponseCode.SUCCESS;
+                            data.message = "Authenticate successfully";
+                            delete currentUser.password;
+                            data.result = currentUser;
+                        } else {
+                            data.code = ResponseCode.AUTHENTICATION_ERROR;
+                            data.message = "Incorrect phoneNumber number or password";
+                        }
+                    } else {
+                        data.code = ResponseCode.AUTHORIZATION_ERROR;
+                        data.message = "Access denied";
+                    }
+                } else {
+                    data.code = ResponseCode.AUTHENTICATION_ERROR;
+                    data.message = "Incorrect phoneNumber number or password";
+                }
+            } else {
+                data.code = ResponseCode.AUTHENTICATION_ERROR;
+                data.message = "Incorrect phoneNumber number or password";
+            }
+            resolve(data);
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+module.exports = {
     handleAdminLogin,
 };

@@ -15,7 +15,7 @@ module.exports = {
                 type: Sequelize.INTEGER,
             },
             imageUrl: {
-                type: Sequelize.TEXT,
+                type: Sequelize.DATE,
             },
             unit: {
                 type: Sequelize.STRING,

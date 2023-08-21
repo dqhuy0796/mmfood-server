@@ -1,12 +1,15 @@
 import bcrypt from "bcryptjs";
+import { ResponseCode } from "../constant";
 import db from "../models";
+
+/** CHECK USERNAME (PHONE) EXIST OR NOT */
 
 let isExistPhone = (currentPhone) => {
     return new Promise(async (resolve, reject) => {
         try {
-            let currentCustomer = await db.User.findOne({
+            let currentCustomer = await db.Customer.findOne({
                 where: {
-                    phone: currentPhone,
+                    phoneNumber: currentPhone,
                 },
             });
             if (currentCustomer) {
@@ -20,39 +23,47 @@ let isExistPhone = (currentPhone) => {
     });
 };
 
+/** BCRYPT PASSWORD */
+
+let hashPassword = (password) => {
+    const salt = bcrypt.genSaltSync(10);
+    return bcrypt.hashSync(password, salt);
+};
+
+/** GET CUSTOMER(S) SERVICE */
+
 let handleGetCustomer = (customerId) => {
     return new Promise(async (resolve, reject) => {
         try {
             let data = {};
             if (customerId && customerId === "all") {
-                let customers = await db.User.findAll({
+                let customers = await db.Customer.findAll({
                     attributes: {
                         exclude: ["password"],
-                    },
-                    where: {
-                        role: "customer",
                     },
                     order: [["id", "DESC"]],
                 });
 
-                data.code = 0;
-                data.message = "get customer(s) success";
+                data.code = ResponseCode.SUCCESS;
+                data.message = "Get customer(s) successfully.";
                 data.result = customers;
             }
             if (customerId && customerId !== "all") {
-                let customer = await db.User.findOne({
+                let customer = await db.Customer.findOne({
                     attributes: {
                         exclude: ["password"],
                     },
                     where: {
                         id: customerId,
-                        role: "customer",
                     },
                 });
                 if (customer) {
-                    data.code = 0;
-                    data.message = "get customer(s) success";
+                    data.code = ResponseCode.SUCCESS;
+                    data.message = "Get customer(s) successfully.";
                     data.result = customer;
+                } else {
+                    data.code = ResponseCode.DATABASE_ERROR;
+                    data.message = "Phone number already in use. Try again!";
                 }
             }
             resolve(data);
@@ -62,57 +73,58 @@ let handleGetCustomer = (customerId) => {
     });
 };
 
-let hashPassword = (password) => {
-    const salt = bcrypt.genSaltSync(10);
-    return bcrypt.hashSync(password, salt);
-};
+/** CREATE NEW CUSTOMER SERVICE */
 
 let handleCreateCustomer = (customer) => {
     return new Promise(async (resolve, reject) => {
         try {
-            let data = {};
-            let isExist = await isExistPhone(customer.phone);
-            if (!isExist) {
-                let hashedPassword = hashPassword(customer.password);
-                await db.User.create({
-                    password: hashedPassword,
-                    name: customer.name,
-                    birth: customer.birth,
-                    avatarUrl: customer.avatarUrl,
-                    phone: customer.phone,
-                    email: customer.email,
-                    address: customer.address,
-                    role: "customer",
-                });
-                data.code = 0;
-                data.message = "successfully";
-            } else {
-                data.code = 1;
-                data.message = "phone number has been used";
+            let isExist = await isExistPhone(customer.phoneNumber);
+
+            if (isExist) {
+                const code = ResponseCode.DATABASE_ERROR;
+                const message = "Phone number already in use.";
+                resolve({ code, message });
             }
-            resolve(data);
+
+            let hashedPassword = hashPassword(customer.password);
+
+            await db.Customer.create({
+                password: hashedPassword,
+                name: customer.name,
+                birth: customer.birth,
+                avatarUrl: customer.avatarUrl,
+                phoneNumber: customer.phoneNumber,
+                email: customer.email,
+                address: customer.address,
+            });
+
+            const code = ResponseCode.SUCCESS;
+            const message = "Create customer successfully.";
+            resolve({ code, message });
         } catch (error) {
             reject(error);
         }
     });
 };
 
+/** UPDATE CUSTOMER INFO */
+
 let handleUpdateCustomer = (customer) => {
     return new Promise(async (resolve, reject) => {
         let data = {};
         try {
-            let targetCustomer = await db.User.findOne({
+            let targetCustomer = await db.Customer.findOne({
                 where: {
                     id: customer.id,
                 },
             });
-            if (targetCustomer && targetCustomer.role === "customer") {
-                await db.User.update(
+            if (targetCustomer) {
+                await db.Customer.update(
                     {
                         name: customer.name,
                         birth: customer.birth,
                         avatarUrl: customer.avatarUrl,
-                        phone: customer.phone,
+                        phoneNumber: customer.phoneNumber,
                         email: customer.email,
                         address: customer.address,
                     },
@@ -122,11 +134,11 @@ let handleUpdateCustomer = (customer) => {
                         },
                     },
                 );
-                data.code = 0;
-                data.message = "update customer successfully";
+                data.code = ResponseCode.SUCCESS;
+                data.message = "Update customer successfully.";
             } else {
-                data.code = 1;
-                data.message = "invalid customer";
+                data.code = ResponseCode.FILE_NOT_FOUND;
+                data.message = "Invalid customer. Check again!";
             }
             resolve(data);
         } catch (error) {
@@ -135,23 +147,23 @@ let handleUpdateCustomer = (customer) => {
     });
 };
 
-let handleUpdateCustomerAddress = (phone, address) => {
+let handleUpdateCustomerAddress = (phoneNumber, address) => {
     return new Promise(async (resolve, reject) => {
         let data = {};
         try {
-            let targetCustomer = await db.User.findOne({
+            let targetCustomer = await db.Customer.findOne({
                 where: {
-                    phone: phone,
+                    phoneNumber: phoneNumber,
                 },
             });
             if (targetCustomer && targetCustomer.address !== address) {
-                await db.User.update(
+                await db.Customer.update(
                     {
                         address: address,
                     },
                     {
                         where: {
-                            phone: phone,
+                            phoneNumber: phoneNumber,
                         },
                     },
                 );
@@ -172,13 +184,13 @@ let handleDeleteCustomer = (customerId) => {
     return new Promise(async (resolve, reject) => {
         let data = {};
         try {
-            let targetCustomer = await db.User.findOne({
+            let targetCustomer = await db.Customer.findOne({
                 where: {
                     id: customerId,
                 },
             });
             if (targetCustomer && targetCustomer.role === "customer") {
-                await db.User.destroy({
+                await db.Customer.destroy({
                     where: {
                         id: customerId,
                     },
@@ -196,7 +208,39 @@ let handleDeleteCustomer = (customerId) => {
     });
 };
 
-export default {
+let handleSearch = (input) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let data = {};
+            if (input && input === " ") {
+                data.code = 1;
+                data.message = "cannot search with blank input";
+            }
+            if (input && input !== " ") {
+                const Op = Sequelize.Op;
+                let products = await db.Product.findAll({
+                    where: {
+                        name: { [Op.like]: `%${input}%` },
+                    },
+                    order: [["categoryId", "ASC"]],
+                });
+                if (products.length > 0) {
+                    data.code = 0;
+                    data.message = "search success";
+                    data.result = products;
+                } else {
+                    data.code = 2;
+                    data.message = "no results match";
+                }
+            }
+            resolve(data);
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+module.exports = {
     handleGetCustomer,
     handleCreateCustomer,
     handleUpdateCustomer,

@@ -1,24 +1,36 @@
-'use strict';
+"use strict";
 module.exports = {
     up: async (queryInterface, Sequelize) => {
-        await queryInterface.createTable('allcodes', {
+        await queryInterface.createTable("delivery_addresses", {
             id: {
                 allowNull: false,
                 autoIncrement: true,
                 primaryKey: true,
                 type: Sequelize.INTEGER,
             },
-            key: {
-                type: Sequelize.STRING,
+            customerId: {
+                type: Sequelize.INTEGER,
             },
-            type: {
-                type: Sequelize.STRING,
-            },
-            valueEng: {
+            details: {
                 type: Sequelize.TEXT,
             },
-            valueVie: {
-                type: Sequelize.TEXT,
+            ward: {
+                type: Sequelize.STRING,
+            },
+            district: {
+                type: Sequelize.STRING,
+            },
+            province: {
+                type: Sequelize.STRING,
+            },
+            receiverName: {
+                type: Sequelize.STRING,
+            },
+            receiverPhoneNumber: {
+                type: Sequelize.STRING,
+            },
+            isDefault: {
+                type: Sequelize.BOOLEAN,
             },
             createdAt: {
                 allowNull: false,
@@ -31,6 +43,6 @@ module.exports = {
         });
     },
     down: async (queryInterface, Sequelize) => {
-        await queryInterface.dropTable('allcodes');
+        await queryInterface.dropTable("delivery_addresses");
     },
 };

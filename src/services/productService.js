@@ -1,4 +1,5 @@
 import db from "../models";
+import { ResponseCode } from "../constant";
 
 let handleGetProduct = (categoryId) => {
     return new Promise(async (resolve, reject) => {
@@ -116,7 +117,7 @@ let handleDeleteProduct = (productId) => {
     });
 };
 
-export default {
+module.exports = {
     handleGetProduct,
     handleCreateProduct,
     handleUpdateProduct,

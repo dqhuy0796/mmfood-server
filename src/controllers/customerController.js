@@ -1,41 +1,5 @@
 import customerService from "../services/customerService";
 
-let login = async (req, res) => {
-    let phone = req.body.phone;
-    let password = req.body.password;
-
-    if (!phone || !password) {
-        return res.status(500).json({
-            code: 3,
-            message: "missing phone or password",
-        });
-    }
-
-    let data = await customerService.handleLogin(phone, password);
-
-    return res.status(200).json({
-        code: data.code,
-        message: data.message,
-        result: data.result ? data.result : {},
-    });
-};
-
-let register = async (req, res) => {
-    let user = {};
-    user.password = req.body.password;
-    user.name = req.body.name;
-    user.phone = req.body.phone;
-    user.email = req.body.email;
-    user.address = req.body.address;
-
-    let data = await customerService.handleRegister(user);
-
-    return res.status(200).json({
-        code: data.code,
-        message: data.message,
-    });
-};
-
 let getCustomer = async (req, res) => {
     if (req.query.id) {
         let data = await customerService.handleGetCustomer(req.query.id);
@@ -57,17 +21,13 @@ let createCustomer = async (req, res) => {
     user.name = req.body.name;
     user.birth = req.body.birth;
     user.avatarUrl = req.body.avatarUrl;
-    user.phone = req.body.phone;
+    user.phoneNumber = req.body.phoneNumber;
     user.email = req.body.email;
     user.address = req.body.address;
-    user.role = req.body.role;
 
     let data = await customerService.handleCreateCustomer(user);
 
-    return res.status(200).json({
-        code: data.code,
-        message: data.message,
-    });
+    return res.status(200).json(data);
 };
 
 let updateCustomer = async (req, res) => {
@@ -76,27 +36,20 @@ let updateCustomer = async (req, res) => {
     user.name = req.body.name;
     user.birth = req.body.birth;
     user.avatarUrl = req.body.avatarUrl;
-    user.phone = req.body.phone;
+    user.phoneNumber = req.body.phoneNumber;
     user.email = req.body.email;
     user.address = req.body.address;
-    user.role = req.body.role;
 
     let data = await customerService.handleUpdateCustomer(user);
 
-    return res.status(200).json({
-        code: data.code,
-        message: data.message,
-    });
+    return res.status(200).json(data);
 };
 
 let updateCustomerAddress = async (req, res) => {
-    if (req.body.phone && req.body.address) {
-        let data = await customerService.handleUpdateCustomerAddress(req.body.phone, req.body.address);
+    if (!req.body.phoneNumber && req.body.address) {
+        let data = await customerService.handleUpdateCustomerAddress(req.body.phoneNumber, req.body.address);
 
-        return res.status(200).json({
-            code: data.code,
-            message: data.message,
-        });
+        return res.status(200).json(data);
     }
     return res.status(200).json({
         code: 1,
@@ -119,9 +72,7 @@ let deleteCustomer = async (req, res) => {
     });
 };
 
-module.exports = {
-    login,
-    register,
+export default {
     getCustomer,
     createCustomer,
     updateCustomer,

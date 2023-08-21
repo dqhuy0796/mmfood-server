@@ -1,23 +1,24 @@
 import bodyParser from "body-parser";
-import express from "express";
-import viewEngine from "./config/viewEngine";
-import initWebRoutes from "./routes/web";
-import connectDatabase from "./config/connectDatabase";
 import cors from "cors";
+import express from "express";
+import dotenv from "dotenv";
+import connectDatabase from "./config/connectdb.js";
+import initWebRoutes from "./routes/web.js";
 
-require("dotenv").config();
+dotenv.config();
 
-let app = express();
+const app = express();
+
 app.use(cors({ origin: true }));
 
 app.use(bodyParser.json());
+
 app.use(bodyParser.urlencoded({ extended: true }));
 
-viewEngine(app);
 initWebRoutes(app);
 
 connectDatabase();
 
-let port = process.env.PORT || 9999;
+let port = process.env.NODE_SERVER_PORT || 9876;
 
 app.listen(port);

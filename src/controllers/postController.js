@@ -1,4 +1,4 @@
-import postService from "../services/postService";
+import postService from "../services/postService.js";
 
 let getPost = async (req, res) => {
     if (req.query.id) {
@@ -63,7 +63,7 @@ let deletePost = async (req, res) => {
     });
 };
 
-module.exports = {
+export default {
     getPost,
     createPost,
     updatePost,

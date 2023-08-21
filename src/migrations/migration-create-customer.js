@@ -9,7 +9,7 @@ module.exports = {
                 type: Sequelize.INTEGER,
             },
             password: {
-                type: Sequelize.STRING,
+                type: Sequelize.TEXT,
             },
             name: {
                 type: Sequelize.STRING,
@@ -20,16 +20,10 @@ module.exports = {
             avatarUrl: {
                 type: Sequelize.TEXT,
             },
-            phone: {
+            phoneNumber: {
                 type: Sequelize.STRING,
             },
             email: {
-                type: Sequelize.STRING,
-            },
-            address: {
-                type: Sequelize.TEXT,
-            },
-            role: {
                 type: Sequelize.STRING,
             },
             createdAt: {

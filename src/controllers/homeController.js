@@ -1,14 +1,16 @@
-import db from "../models/index";
+import db from "../models/index.js";
 
 let getHomepage = async (req, res) => {
     try {
         let data = await db.User.findAll();
-        return res.send({ data: JSON.stringify(data) });
+        return res.status(200).json({
+            result: data || [],
+        });
     } catch (error) {
         console.log(error);
     }
 };
 
-module.exports = {
+export default {
     getHomepage,
 };

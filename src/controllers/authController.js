@@ -1,80 +1,170 @@
-import authService from "../services/authService";
+const ResponseCode = require("../constant").ResponseCode;
+const userAuthService = require("../services/userAuthService");
+const customerAuthService = require("../services/customerAuthService");
 
-let login = async (req, res) => {
-    let phone = req.body.phone;
+/** -------------------------------- USER AUTH -------------------------------- */
+
+let userLogin = async (req, res) => {
+    let username = req.body.username;
     let password = req.body.password;
 
-    if (!phone || !password) {
+    if (!username || !password) {
         return res.status(500).json({
-            code: 3,
-            message: "missing phone or password",
+            code: ResponseCode.AUTHENTICATION_ERROR,
+            message: "Incorrect username or password.",
         });
     }
 
-    let data = await authService.handleLogin(phone, password);
+    let data = await userAuthService.handleLogin(username, password);
 
-    return res.status(200).json({
-        code: data.code,
-        message: data.message,
-        result: data.result ? data.result : {},
-    });
+    return res.status(200).json(data);
 };
 
-let register = async (req, res) => {
-    let user = {};
-    user.password = req.body.password;
-    user.name = req.body.name;
-    user.phone = req.body.phone;
-    user.email = req.body.email;
-    user.address = req.body.address;
+let userRefresh = async (req, res) => {
+    const token = req.body["x-refresh-token"];
 
-    let data = await authService.handleRegister(user);
+    if (!token) {
+        return res.status(403).json({
+            code: ResponseCode.AUTHORIZATION_ERROR,
+            message: "Forbidden. Invalid refresh token.",
+        });
+    }
 
-    return res.status(200).json({
-        code: data.code,
-        message: data.message,
-    });
+    let data = await userAuthService.handleRegenerateAccessToken(token);
+
+    return res.status(200).json(data);
 };
 
-let changePassword = async (req, res) => {
-    let phone = req.body.phone;
+let changeUserPassword = async (req, res) => {
+    let username = req.body.username;
     let password = req.body.password;
     let newPassword = req.body.newPassword;
 
-    if (!phone || !password) {
+    if (!username || !password || !newPassword) {
         return res.status(500).json({
-            code: 3,
-            message: "missing parameter(s)",
+            code: ResponseCode.AUTHENTICATION_ERROR,
+            message: "Missing infomation.",
         });
     }
 
-    let data = await authService.handleChangePassword(phone, password, newPassword);
+    let data = await userAuthService.handleChangePassword(username, password, newPassword);
 
-    return res.status(200).json({
-        code: data.code,
-        message: data.message,
-    });
+    return res.status(200).json(data);
 };
 
-let search = async (req, res) => {
-    if (req.query.input) {
-        const input = req.query.input.trim();
-        let data = await authService.handleSearch(input);
-        return res.status(200).json({
-            code: data.code,
-            message: data.message,
-            result: data.result ? data.result : [],
+/** -------------------------------- CUSTOMER AUTH -------------------------------- */
+
+let customerLogin = async (req, res) => {
+    let phoneNumber = req.body.phoneNumber;
+    let password = req.body.password;
+
+    if (!phoneNumber || !password) {
+        return res.status(500).json({
+            code: ResponseCode.AUTHENTICATION_ERROR,
+            message: "Incorrect phone number or password.",
         });
     }
-    return res.status(200).json({
-        code: 1,
-        message: "missing parameter(s)",
+
+    let data = await customerAuthService.handleLogin(phoneNumber, password);
+
+    return res.status(200).json(data);
+};
+
+const customerRegister = async (req, res) => {
+    const { password, name, phoneNumber, email } = req.body;
+
+    if (!phoneNumber || !password || !name || !email) {
+        return res.status(500).json({
+            code: ResponseCode.AUTHENTICATION_ERROR,
+            message: "Missing information.",
+        });
+    }
+
+    const data = await customerAuthService.handleRegister({
+        password,
+        name,
+        phoneNumber,
+        email,
     });
+
+    return res.status(200).json(data);
+};
+
+const customerUpdateProfile = async (req, res) => {
+    const { email, phoneNumber, name, birth } = req.body;
+
+    if (!phoneNumber || !email || !name || !birth) {
+        return res.status(500).json({
+            code: ResponseCode.AUTHENTICATION_ERROR,
+            message: "Missing information.",
+        });
+    }
+
+    const data = await customerAuthService.handleUpdateProfile({
+        email,
+        phoneNumber,
+        name,
+        birth,
+    });
+
+    return res.status(200).json(data);
+};
+
+let customerVerifyRefreshToken = async (req, res) => {
+    const token = req.body["x-refresh-token"];
+
+    if (!token) {
+        return res.status(403).json({
+            code: ResponseCode.AUTHORIZATION_ERROR,
+            message: "Forbidden. Invalid refresh token.",
+        });
+    }
+
+    let data = await customerAuthService.handleVerifyRefreshToken(token);
+
+    return res.status(200).json(data);
+};
+
+let customerRefreshTokens = async (req, res) => {
+    const token = req.body["x-refresh-token"];
+
+    if (!token) {
+        return res.status(403).json({
+            code: ResponseCode.AUTHORIZATION_ERROR,
+            message: "Forbidden. Invalid refresh token.",
+        });
+    }
+
+    let data = await customerAuthService.handleRefreshTokens(token);
+
+    return res.status(200).json(data);
+};
+
+let changeCustomerPassword = async (req, res) => {
+    let phoneNumber = req.body.phoneNumber;
+    let password = req.body.password;
+    let newPassword = req.body.newPassword;
+
+    if (!phoneNumber || !password || !newPassword) {
+        return res.status(500).json({
+            code: ResponseCode.AUTHENTICATION_ERROR,
+            message: "Missing infomation.",
+        });
+    }
+
+    let data = await customerAuthService.handleChangePassword(phoneNumber, password, newPassword);
+
+    return res.status(200).json(data);
 };
 
 export default {
-    login,
-    register,
-    changePassword,
-    search,
+    userRefresh,
+    userLogin,
+    changeUserPassword,
+    customerLogin,
+    customerRegister,
+    customerUpdateProfile,
+    customerRefreshTokens,
+    customerVerifyRefreshToken,
+    changeCustomerPassword,
 };

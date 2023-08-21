@@ -1,7 +1,7 @@
-'use strict';
-const { Model } = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-    class Allcode extends Model {
+    class RefreshToken extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
@@ -11,17 +11,17 @@ module.exports = (sequelize, DataTypes) => {
             // define association here
         }
     }
-    Allcode.init(
+    RefreshToken.init(
         {
-            key: DataTypes.STRING,
-            type: DataTypes.STRING,
-            valueEng: DataTypes.TEXT,
-            valueVie: DataTypes.TEXT,
+            username: DataTypes.STRING,
+            token: DataTypes.TEXT,
+            expirationDate: DataTypes.DATE,
         },
         {
             sequelize,
-            modelName: 'Allcode',
+            modelName: "RefreshToken",
+            tableName: "refresh_tokens",
         },
     );
-    return Allcode;
+    return RefreshToken;
 };

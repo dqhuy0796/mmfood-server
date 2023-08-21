@@ -1,4 +1,5 @@
 import db from "../models";
+import { ResponseCode } from "../constant";
 
 let handleGetPost = (paramId) => {
     return new Promise(async (resolve, reject) => {
@@ -109,7 +110,7 @@ let handleDeletePost = (postId) => {
     });
 };
 
-export default {
+module.exports = {
     handleGetPost,
     handleCreatePost,
     handleUpdatePost,

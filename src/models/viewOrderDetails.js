@@ -20,12 +20,15 @@ module.exports = (sequelize, DataTypes) => {
             size: DataTypes.STRING,
             oldPrice: DataTypes.DOUBLE,
             newPrice: DataTypes.DOUBLE,
-            description: DataTypes.TEXT,
+            quantity: DataTypes.INTEGER,
+            orderUuid: DataTypes.STRING,
+            orderDetailsPrice: DataTypes.DOUBLE,
         },
         {
             sequelize,
-            modelName: "Product",
-            tableName: "products",
+            modelName: "ViewOrderDetails",
+            tableName: "view_order_details",
+            timestamps: false,
         },
     );
     return Product;

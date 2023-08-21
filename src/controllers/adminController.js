@@ -1,17 +1,17 @@
 import adminService from "../services/adminService";
 
 let adminLogin = async (req, res) => {
-    let phone = req.body.phone;
+    let phoneNumber = req.body.phoneNumber;
     let password = req.body.password;
 
-    if (!phone || !password) {
+    if (!phoneNumber || !password) {
         return res.status(500).json({
             code: 4,
             message: "missing parameter(s)",
         });
     }
 
-    let data = await adminService.handleAdminLogin(phone, password);
+    let data = await adminService.handleAdminLogin(phoneNumber, password);
 
     return res.status(200).json({
         code: data.code,
